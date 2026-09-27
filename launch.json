@@ -1,0 +1,22 @@
+{
+  "kind": "evm_project",
+  "token": {
+    "contract": "LaunchToken",
+    "name": "Match",
+    "symbol": "MTCH",
+    "decimals": 18
+  },
+  "pool": {
+    "pairedCurrency": "0x0000000000000000000000000000000000000000",
+    "fee": 3000,
+    "tickSpacing": 60,
+    "initialPrice": "79228162514264337593543950336"
+  },
+  "contracts": [
+    {
+      "contract": "QuadraticFunding",
+      "constructorArgs": ["$token"]
+    }
+  ],
+  "notes": "Match (MTCH) launch on Sepolia with one application contract. LaunchToken (src/LaunchToken.sol) is a fixed-supply OpenZeppelin ERC-20: no constructor arguments, 18 decimals, 1,000,000,000 MTCH (10^27 minor units) minted once to msg.sender (the project factory), no mint, owner, pause or upgrade path. QuadraticFunding (src/QuadraticFunding.sol) is the quadratic funding round manager. Its only constructor argument is the MTCH address, supplied as $token; it stores the address immutable, exposes it as token(), and reverts if the address is zero or has no code, so it must deploy after the token. It has no owner or admin role, no payable function and no receive/fallback, so it never holds ETH and holds no MTCH at deploy. Every MTCH payment in is approve + SafeERC20.safeTransferFrom; payouts are pull-based, nonReentrant and follow checks-effects-interactions. Rounds are created by anyone (1 to 30 days), curated by their creator (at most 50 registered projects), funded by anyone until end, and finalized once after end using sumSqrt^2 weights and Math.mulDiv with the rounding remainder assigned to the largest-weight project (lowest id on ties) so the whole pool is distributed; with no contributions each funder reclaims their own funding. Pool: MTCH paired against native Sepolia ETH (zero address), fee 3000, tickSpacing 60, no hook; initialPrice is sqrtPriceX96 for a 1:1 legacy default and the deployer derives the effective opening price from the pinned policy. Ownership, supply split, rewards and the MerkleDistributor come from policy and the factory, not from this manifest. Contributors obtain MTCH by swapping Sepolia ETH in the launch pool. ABI exports: docs/abi/LaunchToken.json and docs/abi/QuadraticFunding.json."
+}
